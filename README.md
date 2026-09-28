@@ -1,16 +1,16 @@
-# Crystal Computer
+# CrystalCode Computer
 
 This is an independent native dotnet tool set for Crystal Code. The current
 VirtualBox adapter can report VM state, capture a display, type text, and press
-keys or shortcuts. Mouse
-input and guest process execution are not implemented yet.
+keys or shortcuts. Mouse input and guest process execution are not implemented
+yet.
 
 Set `CRYSTAL_COMPUTER_VM_UUID` to the UUID of the VM the agent may control.
 Optionally set `CRYSTAL_COMPUTER_VBOXMANAGE` to the absolute path of `VBoxManage`.
 The VM must already be running. The tool set never accepts a VM identifier from
 the model.
 
-Publish `Crystal.Computer/Crystal.Computer.csproj` and place the published files
+Publish `CrystalCode.Computer/CrystalCode.Computer.csproj` and place the published files
 and `tools.json` together in one directory under `~/.crystal/tools`. Enable
 External Tools in Crystal Code and select a model and provider that support
 image input for `computer_observe`. The manifest enables the Work catalog and

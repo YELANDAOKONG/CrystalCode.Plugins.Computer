@@ -1,11 +1,11 @@
 {
   "runner": "dotnet",
-  "assembly": "Crystal.Computer.dll",
+  "assembly": "CrystalCode.Computer.dll",
   "types": [
-    "Crystal.Computer.Tools.ComputerStatusTool",
-    "Crystal.Computer.Tools.ComputerObserveTool",
-    "Crystal.Computer.Tools.ComputerTypeTool",
-    "Crystal.Computer.Tools.ComputerKeysTool"
+    "CrystalCode.Computer.Tools.ComputerStatusTool",
+    "CrystalCode.Computer.Tools.ComputerObserveTool",
+    "CrystalCode.Computer.Tools.ComputerTypeTool",
+    "CrystalCode.Computer.Tools.ComputerKeysTool"
   ],
   "catalogs": ["work"],
   "approval": "always",
