@@ -12,7 +12,7 @@ public sealed class ComputerClickTool : ITool
         "computer_click",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"display\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":7},\"x\":{\"type\":\"integer\",\"minimum\":0},\"y\":{\"type\":\"integer\",\"minimum\":0},\"button\":{\"type\":\"string\",\"enum\":[\"left\",\"right\",\"middle\"]},\"clicks\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":2}},\"required\":[\"x\",\"y\"],\"additionalProperties\":false}")
             .RootElement.Clone(),
-        "Click at pixel coordinates on a display of the configured VM. The origin is the top left of the computer_observe image. The VM must use an absolute pointer, such as a USB Tablet.");
+        "Click at pixel coordinates on a display of the configured VM. The origin is the top left of the computer_observe image. The VM must use an absolute pointer, such as a USB Tablet. Call computer_observe afterward to check the guest's response.");
 
     public ToolDefinition Definition => Tool;
 
@@ -67,7 +67,8 @@ public sealed class ComputerClickTool : ITool
         {
             var adapter = ComputerAdapters.Open();
             await adapter.ClickAsync(display, x, y, button, clicks, cancellationToken);
-            return new ToolOutput("The pointer click was sent to the configured VM.");
+            return new ToolOutput(
+                "The pointer click was sent to VirtualBox. Use computer_observe to check the guest's response.");
         }
         catch (InvalidOperationException exception)
         {

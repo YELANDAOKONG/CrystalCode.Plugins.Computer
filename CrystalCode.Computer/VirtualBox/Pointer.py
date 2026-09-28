@@ -106,6 +106,10 @@ def parse_events(values):
 def send_events(uuid, values):
     events = parse_events(values)
     manager, session = open_session(uuid)
+    mouse = None
+    pressed = False
+    last_x = 0
+    last_y = 0
     try:
         mouse = session.console.mouse
         if not bool(mouse.absoluteSupported):
@@ -113,12 +117,24 @@ def send_events(uuid, values):
         for delay, x, y, vertical, horizontal, buttons in events:
             if delay:
                 time.sleep(delay / 1000)
+            last_x = x
+            last_y = y
+            if buttons:
+                pressed = True
             mouse.putMouseEventAbsolute(x, y, vertical, horizontal, buttons)
+            if not buttons:
+                pressed = False
     except SystemExit:
         raise
     except Exception:
         fail("event-rejected")
     finally:
+        if pressed and mouse is not None:
+            # Retry release if a later pointer event failed after pressing.
+            try:
+                mouse.putMouseEventAbsolute(last_x, last_y, 0, 0, 0)
+            except Exception:
+                pass
         close_session(manager, session)
 
 

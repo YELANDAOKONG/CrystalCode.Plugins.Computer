@@ -12,7 +12,7 @@ public sealed class ComputerKeysTool : ITool
         "computer_keys",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"keys\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"minItems\":1,\"maxItems\":4}},\"required\":[\"keys\"],\"additionalProperties\":false}")
             .RootElement.Clone(),
-        "Press a key or shortcut in the configured VM. Keys are ordered, for example [ctrl, c]. Supported keys: letters, digits, enter, escape, tab, backspace, space, delete, insert, arrows, home, end, pageup, pagedown, f1-f12, ctrl, alt, shift, meta.");
+        "Press a key or shortcut in the configured VM. Keys are ordered, for example [ctrl, c]. Supported keys: letters, digits, enter, escape, tab, backspace, space, delete, insert, arrows, home, end, pageup, pagedown, f1-f12, ctrl, alt, shift, meta. Call computer_observe afterward to check the guest's response.");
 
     public ToolDefinition Definition => Tool;
 
@@ -44,7 +44,8 @@ public sealed class ComputerKeysTool : ITool
         {
             var adapter = ComputerAdapters.Open();
             await adapter.PressKeysAsync(keys, cancellationToken);
-            return new ToolOutput("Keys were sent to the configured VM.");
+            return new ToolOutput(
+                "Keys were sent to VirtualBox. Use computer_observe to check the guest's response.");
         }
         catch (InvalidOperationException exception)
         {

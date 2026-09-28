@@ -232,7 +232,8 @@ internal sealed class VBoxManageAdapter : IComputerAdapter
         var status = await GetStatusAsync(cancellationToken).ConfigureAwait(false);
         if (!status.IsRunning)
         {
-            throw new InvalidOperationException("The authorized VM is not running.");
+            throw new InvalidOperationException(
+                "The authorized VM is not reported as running by this VirtualBox session.");
         }
 
         if (status.Additions.State != GuestAdditionsState.Active)
@@ -257,7 +258,8 @@ internal sealed class VBoxManageAdapter : IComputerAdapter
         var status = await GetStatusAsync(cancellationToken).ConfigureAwait(false);
         if (!status.IsRunning)
         {
-            throw new InvalidOperationException("The authorized VM is not running.");
+            throw new InvalidOperationException(
+                "The authorized VM is not reported as running by this VirtualBox session.");
         }
     }
 

@@ -12,7 +12,7 @@ public sealed class ComputerStatusTool : ITool
         "computer_status",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}")
             .RootElement.Clone(),
-        "Report the state of the configured VirtualBox VM and whether Guest Additions are loaded.");
+        "Report the state of the configured VM as seen by this VirtualBox session and whether Guest Additions are loaded.");
 
     public ToolDefinition Definition => Tool;
 
