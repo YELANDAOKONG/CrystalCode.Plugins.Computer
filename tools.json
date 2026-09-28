@@ -1,0 +1,13 @@
+{
+  "runner": "dotnet",
+  "assembly": "Crystal.Computer.dll",
+  "types": [
+    "Crystal.Computer.Tools.ComputerStatusTool",
+    "Crystal.Computer.Tools.ComputerObserveTool",
+    "Crystal.Computer.Tools.ComputerTypeTool",
+    "Crystal.Computer.Tools.ComputerKeysTool"
+  ],
+  "catalogs": ["work"],
+  "approval": "always",
+  "timeoutSeconds": 60
+}
