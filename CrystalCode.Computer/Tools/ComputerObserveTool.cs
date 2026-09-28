@@ -4,10 +4,9 @@ using Crystal.Media;
 using Crystal.Multimodal;
 using Crystal.Multimodal.Tools;
 using Crystal.Tools;
+using CrystalCode.Computer.Configuration;
 
-using Crystal.Computer.Configuration;
-
-namespace Crystal.Computer.Tools;
+namespace CrystalCode.Computer.Tools;
 
 public sealed class ComputerObserveTool : IMultimodalTool
 {

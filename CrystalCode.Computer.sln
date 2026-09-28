@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crystal.Computer", "Crystal.Computer\Crystal.Computer.csproj", "{999AEF38-5974-4410-94A6-B0A2B95DD2F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrystalCode.Computer", "CrystalCode.Computer\CrystalCode.Computer.csproj", "{999AEF38-5974-4410-94A6-B0A2B95DD2F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

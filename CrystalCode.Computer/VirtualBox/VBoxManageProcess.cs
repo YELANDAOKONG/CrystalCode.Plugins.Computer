@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace Crystal.Computer.VirtualBox;
+namespace CrystalCode.Computer.VirtualBox;
 
 internal static class VBoxManageProcess
 {

@@ -1,4 +1,4 @@
-namespace Crystal.Computer.VirtualBox;
+namespace CrystalCode.Computer.VirtualBox;
 
 internal static class VirtualBoxScancodes
 {

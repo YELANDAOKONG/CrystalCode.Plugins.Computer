@@ -1,7 +1,7 @@
-using Crystal.Computer.Interfaces;
-using Crystal.Computer.VirtualBox;
+using CrystalCode.Computer.Interfaces;
+using CrystalCode.Computer.VirtualBox;
 
-namespace Crystal.Computer.Configuration;
+namespace CrystalCode.Computer.Configuration;
 
 internal sealed record ComputerSettings(string VmUuid, string Executable)
 {

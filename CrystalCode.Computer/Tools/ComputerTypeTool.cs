@@ -1,10 +1,9 @@
 using System.Text.Json;
 
 using Crystal.Tools;
+using CrystalCode.Computer.Configuration;
 
-using Crystal.Computer.Configuration;
-
-namespace Crystal.Computer.Tools;
+namespace CrystalCode.Computer.Tools;
 
 public sealed class ComputerTypeTool : ITool
 {

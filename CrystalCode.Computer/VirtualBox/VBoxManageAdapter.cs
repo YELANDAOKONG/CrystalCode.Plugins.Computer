@@ -1,11 +1,10 @@
 using System.Buffers.Binary;
 using System.Globalization;
 using System.Text;
+using CrystalCode.Computer.Configuration;
+using CrystalCode.Computer.Interfaces;
 
-using Crystal.Computer.Configuration;
-using Crystal.Computer.Interfaces;
-
-namespace Crystal.Computer.VirtualBox;
+namespace CrystalCode.Computer.VirtualBox;
 
 internal sealed class VBoxManageAdapter : IComputerAdapter
 {

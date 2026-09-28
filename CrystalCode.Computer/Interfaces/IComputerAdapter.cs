@@ -1,4 +1,4 @@
-namespace Crystal.Computer.Interfaces;
+namespace CrystalCode.Computer.Interfaces;
 
 internal interface IComputerAdapter
 {
