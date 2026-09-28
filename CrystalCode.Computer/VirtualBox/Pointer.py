@@ -25,50 +25,50 @@ def open_session(uuid):
     session = manager.getSessionObject(virtual_box)
     machine = virtual_box.findMachine(uuid)
     machine.lockMachine(session, manager.constants.LockType_Shared)
-    return session
+    # VirtualBoxManager.__del__ shuts down XPCOM, so the caller keeps it
+    # until the session is unlocked.
+    return manager, session
 
 
-def close_session(session):
+def close_session(manager, session):
     try:
         session.unlockMachine()
     except Exception:
         return
+    finally:
+        # Drop this reference only after unlock. The caller also keeps manager
+        # alive until this function returns.
+        del manager
 
 
-def screen_count(session):
-    try:
-        count = int(session.machine.monitorCount)
-    except Exception:
-        fail("event-rejected")
-    if count < 1 or count > 8:
-        fail("event-rejected")
-    return count
-
-
-def read_screen(display, screen_id):
-    try:
-        width, height, _bits, x_origin, y_origin, status = display.getScreenResolution(
-            screen_id)
-    except Exception:
-        fail("event-rejected")
-    return {
-        "display": screen_id,
-        "width": int(width),
-        "height": int(height),
-        "x": int(x_origin),
-        "y": int(y_origin),
-        "active": int(status) == 1 and int(width) > 0 and int(height) > 0,
-    }
+def read_screens(display):
+    screens = []
+    for screen_id in range(8):
+        try:
+            width, height, _bits, x_origin, y_origin, status = display.getScreenResolution(
+                screen_id)
+        except Exception:
+            if len(screens) == 0:
+                fail("event-rejected")
+            return screens
+        screens.append(
+            {
+                "display": screen_id,
+                "width": int(width),
+                "height": int(height),
+                "x": int(x_origin),
+                "y": int(y_origin),
+                "active": int(status) == 1 and int(width) > 0 and int(height) > 0,
+            }
+        )
+    return screens
 
 
 def write_layout(uuid):
-    session = open_session(uuid)
+    manager, session = open_session(uuid)
     try:
         console = session.console
-        screens = [
-            read_screen(console.display, index)
-            for index in range(screen_count(session))
-        ]
+        screens = read_screens(console.display)
         absolute = bool(console.mouse.absoluteSupported)
         sys.stdout.write(json.dumps({"absolute": absolute, "screens": screens}))
     except SystemExit:
@@ -76,7 +76,7 @@ def write_layout(uuid):
     except Exception:
         fail("event-rejected")
     finally:
-        close_session(session)
+        close_session(manager, session)
 
 
 def parse_events(values):
@@ -105,7 +105,7 @@ def parse_events(values):
 
 def send_events(uuid, values):
     events = parse_events(values)
-    session = open_session(uuid)
+    manager, session = open_session(uuid)
     try:
         mouse = session.console.mouse
         if not bool(mouse.absoluteSupported):
@@ -119,7 +119,7 @@ def send_events(uuid, values):
     except Exception:
         fail("event-rejected")
     finally:
-        close_session(session)
+        close_session(manager, session)
 
 
 def main(argv):
