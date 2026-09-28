@@ -57,6 +57,24 @@ public sealed class ComputerToolTests
         });
     }
 
+    [Theory]
+    [InlineData("{\"display\":\"0\",\"x\":4,\"y\":9}")]
+    [InlineData("{\"x\":\"4\",\"y\":9}")]
+    [InlineData("{\"x\":4,\"y\":false}")]
+    [InlineData("{\"x\":4,\"y\":9,\"clicks\":\"2\"}")]
+    public async Task Click_InvalidIntegerTypes_ReturnFailure(string arguments)
+    {
+        var adapter = new RecordingAdapter();
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerClickTool().InvokeAsync(
+                new ToolCall("1", "computer_click", arguments));
+
+            Assert.Equal(ToolResultStatus.Failure, output.Status);
+            Assert.False(adapter.Opened);
+        });
+    }
+
     [Fact]
     public async Task Run_PassesTheGuestCommand()
     {

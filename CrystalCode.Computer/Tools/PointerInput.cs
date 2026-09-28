@@ -17,7 +17,9 @@ internal static class PointerInput
             return true;
         }
 
-        if (!value.TryGetInt32(out display) || display is < 0 or > MaximumDisplay)
+        if (value.ValueKind != JsonValueKind.Number
+            || !value.TryGetInt32(out display)
+            || display is < 0 or > MaximumDisplay)
         {
             error = "Display must be an integer from 0 through 7.";
             return false;
@@ -39,6 +41,8 @@ internal static class PointerInput
         error = null;
         if (!root.TryGetProperty(xName, out var xValue)
             || !root.TryGetProperty(yName, out var yValue)
+            || xValue.ValueKind != JsonValueKind.Number
+            || yValue.ValueKind != JsonValueKind.Number
             || !xValue.TryGetInt32(out x)
             || !yValue.TryGetInt32(out y)
             || x < 0

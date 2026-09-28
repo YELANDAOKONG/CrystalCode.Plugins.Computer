@@ -51,7 +51,8 @@ public sealed class ComputerClickTool : ITool
 
             clicks = 1;
             if (root.TryGetProperty("clicks", out var clickValue)
-                && (!clickValue.TryGetInt32(out clicks)
+                && (clickValue.ValueKind != JsonValueKind.Number
+                    || !clickValue.TryGetInt32(out clicks)
                     || clicks is < 1 or > PointerInput.MaximumClicks))
             {
                 return Failure("Clicks must be 1 or 2.");
