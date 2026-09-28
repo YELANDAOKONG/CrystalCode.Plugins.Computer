@@ -4,6 +4,7 @@ using Crystal.Media;
 using Crystal.Multimodal;
 using Crystal.Multimodal.Tools;
 using Crystal.Tools;
+
 using CrystalCode.Computer.Configuration;
 
 namespace CrystalCode.Computer.Tools;
@@ -14,7 +15,7 @@ public sealed class ComputerObserveTool : IMultimodalTool
         "computer_observe",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"display\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":7}},\"additionalProperties\":false}")
             .RootElement.Clone(),
-        "Capture one display of the configured VirtualBox VM. Requires image input support.");
+        "Capture one display of the configured VirtualBox VM. Pointer coordinates are pixels from the top left of this image. Requires image input support.");
 
     public ToolDefinition Definition => Tool;
 
@@ -52,7 +53,7 @@ public sealed class ComputerObserveTool : IMultimodalTool
 
         try
         {
-            var adapter = ComputerSettings.CreateAdapter();
+            var adapter = ComputerAdapters.Open();
             var capture = await adapter.CaptureAsync(display, cancellationToken);
             var image = new ImageMedia(
                 new InlineMediaSource(capture.Data),

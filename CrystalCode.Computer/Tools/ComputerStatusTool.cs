@@ -1,6 +1,7 @@
 using System.Text.Json;
 
 using Crystal.Tools;
+
 using CrystalCode.Computer.Configuration;
 
 namespace CrystalCode.Computer.Tools;
@@ -11,7 +12,7 @@ public sealed class ComputerStatusTool : ITool
         "computer_status",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}")
             .RootElement.Clone(),
-        "Report the state of the configured VirtualBox VM.");
+        "Report the state of the configured VirtualBox VM and whether Guest Additions are loaded.");
 
     public ToolDefinition Definition => Tool;
 
@@ -21,9 +22,9 @@ public sealed class ComputerStatusTool : ITool
     {
         try
         {
-            var adapter = ComputerSettings.CreateAdapter();
+            var adapter = ComputerAdapters.Open();
             var state = await adapter.GetStatusAsync(cancellationToken);
-            return new ToolOutput($"The configured VM is {state}.");
+            return new ToolOutput(state.Describe());
         }
         catch (InvalidOperationException exception)
         {

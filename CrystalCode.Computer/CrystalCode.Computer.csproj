@@ -10,4 +10,12 @@
         <ProjectReference Include="../../Crystal/Crystal.Tools/Crystal.Tools.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="CrystalCode.Computer.Tests" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="VirtualBox\Pointer.py" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>

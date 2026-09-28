@@ -18,6 +18,6 @@ internal sealed record ComputerSettings(string VmUuid, string Executable)
         var settings = new ComputerSettings(
             uuid.ToString("D"),
             string.IsNullOrWhiteSpace(executable) ? "VBoxManage" : executable);
-        return new VBoxManageAdapter(settings);
+        return new VBoxManageAdapter(settings, new VBoxManageProcess());
     }
 }

@@ -24,6 +24,12 @@ internal static class VirtualBoxScancodes
             ["up"] = [0xE0, 0x48], ["down"] = [0xE0, 0x50],
             ["left"] = [0xE0, 0x4B], ["right"] = [0xE0, 0x4D],
             ["home"] = [0xE0, 0x47], ["end"] = [0xE0, 0x4F],
+            ["pageup"] = [0xE0, 0x49], ["pagedown"] = [0xE0, 0x51],
+            ["insert"] = [0xE0, 0x52],
+            ["f1"] = [0x3B], ["f2"] = [0x3C], ["f3"] = [0x3D],
+            ["f4"] = [0x3E], ["f5"] = [0x3F], ["f6"] = [0x40],
+            ["f7"] = [0x41], ["f8"] = [0x42], ["f9"] = [0x43],
+            ["f10"] = [0x44], ["f11"] = [0x57], ["f12"] = [0x58],
             ["ctrl"] = [0x1D], ["alt"] = [0x38],
             ["shift"] = [0x2A], ["meta"] = [0xE0, 0x5B]
         };

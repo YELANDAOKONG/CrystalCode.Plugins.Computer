@@ -5,9 +5,13 @@
     "CrystalCode.Computer.Tools.ComputerStatusTool",
     "CrystalCode.Computer.Tools.ComputerObserveTool",
     "CrystalCode.Computer.Tools.ComputerTypeTool",
-    "CrystalCode.Computer.Tools.ComputerKeysTool"
+    "CrystalCode.Computer.Tools.ComputerKeysTool",
+    "CrystalCode.Computer.Tools.ComputerClickTool",
+    "CrystalCode.Computer.Tools.ComputerDragTool",
+    "CrystalCode.Computer.Tools.ComputerScrollTool",
+    "CrystalCode.Computer.Tools.ComputerRunTool"
   ],
   "catalogs": ["work"],
   "approval": "always",
-  "timeoutSeconds": 60
+  "timeoutSeconds": 120
 }

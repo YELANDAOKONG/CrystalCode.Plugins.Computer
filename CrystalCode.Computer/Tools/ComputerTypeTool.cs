@@ -1,7 +1,9 @@
 using System.Text.Json;
 
 using Crystal.Tools;
+
 using CrystalCode.Computer.Configuration;
+using CrystalCode.Computer.VirtualBox;
 
 namespace CrystalCode.Computer.Tools;
 
@@ -12,7 +14,7 @@ public sealed class ComputerTypeTool : ITool
         "computer_type",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"additionalProperties\":false}")
             .RootElement.Clone(),
-        "Type text into the configured VirtualBox VM at its current focus.");
+        "Type text into the configured VirtualBox VM at its current focus. Only tab, newline, and printable ASCII are typed.");
 
     public ToolDefinition Definition => Tool;
 
@@ -40,9 +42,15 @@ public sealed class ComputerTypeTool : ITool
             return Failure("Text must contain 1 to 4096 characters.");
         }
 
+        if (!TypableText.IsSupported(value))
+        {
+            return Failure(
+                "Text must use tab, newline, and printable ASCII. Other characters are not typed.");
+        }
+
         try
         {
-            var adapter = ComputerSettings.CreateAdapter();
+            var adapter = ComputerAdapters.Open();
             await adapter.TypeTextAsync(value, cancellationToken);
             return new ToolOutput("Text was sent to the configured VM.");
         }
