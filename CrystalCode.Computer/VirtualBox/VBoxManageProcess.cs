@@ -66,10 +66,12 @@ internal sealed class VBoxManageProcess : IProcessRunner
             throw new ProcessStartException(exception);
         }
 
+        Task<StreamCapture>? stdoutTask = null;
+        Task<StreamCapture>? stderrTask = null;
         try
         {
-            var stdoutTask = ReadStreamAsync(process.StandardOutput, cancellationToken);
-            var stderrTask = ReadStreamAsync(process.StandardError, cancellationToken);
+            stdoutTask = ReadStreamAsync(process.StandardOutput, cancellationToken);
+            stderrTask = ReadStreamAsync(process.StandardError, cancellationToken);
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
             var stdout = await stdoutTask.ConfigureAwait(false);
             var stderr = await stderrTask.ConfigureAwait(false);
@@ -86,7 +88,30 @@ internal sealed class VBoxManageProcess : IProcessRunner
                 process.Kill(entireProcessTree: true);
             }
 
+            await DrainAsync(stdoutTask, stderrTask).ConfigureAwait(false);
             throw;
+        }
+    }
+
+    private static async Task DrainAsync(params Task?[] tasks)
+    {
+        // Observe the stream readers before the process is disposed so a
+        // cancelled read cannot surface later as an unobserved exception.
+        foreach (var task in tasks)
+        {
+            if (task is null)
+            {
+                continue;
+            }
+
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                // The readers were cancelled alongside the process.
+            }
         }
     }
 

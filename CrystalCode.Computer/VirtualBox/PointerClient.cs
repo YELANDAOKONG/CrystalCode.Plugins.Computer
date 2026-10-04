@@ -105,7 +105,7 @@ internal sealed class PointerClient
         }
 
         var result = await RunScriptAsync(arguments, cancellationToken).ConfigureAwait(false);
-        if (result.ExitCode != 0)
+        if (result.ExitCode != 0 || result.Truncated)
         {
             throw new InvalidOperationException(DescribeFailure(result.StandardOutput));
         }
