@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../../Crystal/Crystal.Tools/Crystal.Tools.csproj" />
-        <ProjectReference Include="../../CrystalHarness/CrystalCode.Plugins/CrystalCode.Plugins.csproj" />
+        <ProjectReference Include="../../CrystalCode/CrystalCode.Plugins/CrystalCode.Plugins.csproj" />
     </ItemGroup>
 
     <ItemGroup>
