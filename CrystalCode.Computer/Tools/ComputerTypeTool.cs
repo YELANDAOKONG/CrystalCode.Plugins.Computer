@@ -58,7 +58,7 @@ public sealed class ComputerTypeTool : ITool
         {
             return Failure(exception.Message);
         }
-        catch (IOException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             return Failure("Text could not be sent to the configured VM.");
         }

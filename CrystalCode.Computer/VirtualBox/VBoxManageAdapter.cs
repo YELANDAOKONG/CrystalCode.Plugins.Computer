@@ -44,14 +44,8 @@ internal sealed class VBoxManageAdapter : IComputerAdapter
         CancellationToken cancellationToken)
     {
         await RequireRunningAsync(cancellationToken).ConfigureAwait(false);
+        // On Unix the directory is created readable by its owner only.
         var directory = Directory.CreateTempSubdirectory("crystal-computer-");
-        if (!OperatingSystem.IsWindows())
-        {
-            File.SetUnixFileMode(
-                directory.FullName,
-                UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
-        }
-
         var path = Path.Combine(directory.FullName, "display.png");
         try
         {
@@ -85,8 +79,7 @@ internal sealed class VBoxManageAdapter : IComputerAdapter
         }
         finally
         {
-            File.Delete(path);
-            directory.Delete();
+            DeleteQuietly(directory);
         }
     }
 
@@ -291,6 +284,18 @@ internal sealed class VBoxManageAdapter : IComputerAdapter
         catch (ProcessStartException exception)
         {
             throw new InvalidOperationException("VBoxManage could not be started.", exception);
+        }
+    }
+
+    private static void DeleteQuietly(DirectoryInfo directory)
+    {
+        // Cleanup must not replace the result or the original failure.
+        try
+        {
+            directory.Delete(recursive: true);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
         }
     }
 

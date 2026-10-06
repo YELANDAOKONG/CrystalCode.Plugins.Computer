@@ -10,6 +10,8 @@ internal sealed class RecordingAdapter : IComputerAdapter
 
     public bool Opened { get; private set; }
 
+    public Exception? TypeFailure { get; set; }
+
     public int ClickX { get; private set; }
 
     public int ClickY { get; private set; }
@@ -39,6 +41,11 @@ internal sealed class RecordingAdapter : IComputerAdapter
     public Task TypeTextAsync(string text, CancellationToken cancellationToken)
     {
         Opened = true;
+        if (TypeFailure is not null)
+        {
+            throw TypeFailure;
+        }
+
         Typed = text;
         return Task.CompletedTask;
     }

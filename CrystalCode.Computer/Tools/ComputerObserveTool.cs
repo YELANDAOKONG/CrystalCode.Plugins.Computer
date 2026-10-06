@@ -69,7 +69,7 @@ public sealed class ComputerObserveTool : IMultimodalTool
         {
             return Failure(exception.Message);
         }
-        catch (IOException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
         {
             return Failure("The VM screenshot could not be read.");
         }

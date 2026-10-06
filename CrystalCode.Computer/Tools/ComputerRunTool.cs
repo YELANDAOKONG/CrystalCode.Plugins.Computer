@@ -121,7 +121,8 @@ public sealed class ComputerRunTool : ITool
 
         var timeout = DefaultTimeoutSeconds;
         if (root.TryGetProperty("timeoutSeconds", out var timeoutValue)
-            && (!timeoutValue.TryGetInt32(out timeout)
+            && (timeoutValue.ValueKind != JsonValueKind.Number
+                || !timeoutValue.TryGetInt32(out timeout)
                 || timeout is < 1 or > MaximumTimeoutSeconds))
         {
             error = "Timeout must be an integer from 1 through 60 seconds.";

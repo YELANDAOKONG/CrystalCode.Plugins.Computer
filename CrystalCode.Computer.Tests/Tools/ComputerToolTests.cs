@@ -95,6 +95,98 @@ public sealed class ComputerToolTests
         });
     }
 
+    [Theory]
+    [InlineData("{\"executable\":\"/bin/echo\",\"timeoutSeconds\":\"5\"}")]
+    [InlineData("{\"executable\":\"/bin/echo\",\"timeoutSeconds\":true}")]
+    [InlineData("{\"executable\":\"/bin/echo\",\"timeoutSeconds\":null}")]
+    [InlineData("{\"executable\":\"/bin/echo\",\"timeoutSeconds\":1.5}")]
+    [InlineData("{\"executable\":\"/bin/echo\",\"timeoutSeconds\":0}")]
+    [InlineData("{\"executable\":\"/bin/echo\",\"timeoutSeconds\":61}")]
+    public async Task Run_InvalidTimeout_ReturnsFailure(string arguments)
+    {
+        var adapter = new RecordingAdapter();
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerRunTool().InvokeAsync(
+                new ToolCall("1", "computer_run", arguments));
+
+            Assert.Equal(ToolResultStatus.Failure, output.Status);
+            Assert.Contains("Timeout", output.Text, StringComparison.Ordinal);
+            Assert.False(adapter.Opened);
+        });
+    }
+
+    [Fact]
+    public async Task Run_WithoutTimeout_UsesTheDefault()
+    {
+        var adapter = new RecordingAdapter();
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerRunTool().InvokeAsync(
+                new ToolCall("1", "computer_run", "{\"executable\":\"/bin/echo\"}"));
+
+            Assert.Equal(ToolResultStatus.Success, output.Status);
+            Assert.Equal(ComputerRunTool.DefaultTimeoutSeconds, adapter.Command!.TimeoutSeconds);
+        });
+    }
+
+    [Theory]
+    [InlineData("{\"x\":1,\"y\":1,\"direction\":\"down\",\"amount\":\"5\"}")]
+    [InlineData("{\"x\":1,\"y\":1,\"direction\":\"down\",\"amount\":true}")]
+    [InlineData("{\"x\":1,\"y\":1,\"direction\":\"down\",\"amount\":null}")]
+    [InlineData("{\"x\":1,\"y\":1,\"direction\":\"down\",\"amount\":2.5}")]
+    [InlineData("{\"x\":1,\"y\":1,\"direction\":\"down\",\"amount\":0}")]
+    [InlineData("{\"x\":1,\"y\":1,\"direction\":\"down\",\"amount\":21}")]
+    public async Task Scroll_InvalidAmount_ReturnsFailure(string arguments)
+    {
+        var adapter = new RecordingAdapter();
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerScrollTool().InvokeAsync(
+                new ToolCall("1", "computer_scroll", arguments));
+
+            Assert.Equal(ToolResultStatus.Failure, output.Status);
+            Assert.Contains("Scroll amount", output.Text, StringComparison.Ordinal);
+            Assert.False(adapter.Opened);
+        });
+    }
+
+    [Fact]
+    public async Task Scroll_ValidAmount_ReachesTheAdapter()
+    {
+        var adapter = new RecordingAdapter();
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerScrollTool().InvokeAsync(
+                new ToolCall(
+                    "1",
+                    "computer_scroll",
+                    "{\"x\":1,\"y\":1,\"direction\":\"up\",\"amount\":20}"));
+
+            Assert.Equal(ToolResultStatus.Success, output.Status);
+            Assert.True(adapter.Opened);
+        });
+    }
+
+    [Theory]
+    [InlineData(typeof(IOException))]
+    [InlineData(typeof(UnauthorizedAccessException))]
+    public async Task Type_FileSystemFailure_ReturnsFailure(Type failure)
+    {
+        var adapter = new RecordingAdapter
+        {
+            TypeFailure = (Exception)Activator.CreateInstance(failure)!
+        };
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerTypeTool().InvokeAsync(
+                new ToolCall("1", "computer_type", "{\"text\":\"hi\"}"));
+
+            Assert.Equal(ToolResultStatus.Failure, output.Status);
+            Assert.Equal("Text could not be sent to the configured VM.", output.Text);
+        });
+    }
+
     [Fact]
     public async Task Keys_AcceptsFunctionKeys()
     {

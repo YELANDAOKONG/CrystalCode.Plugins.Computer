@@ -51,7 +51,8 @@ public sealed class ComputerScrollTool : ITool
 
             amount = 1;
             if (root.TryGetProperty("amount", out var amountValue)
-                && (!amountValue.TryGetInt32(out amount)
+                && (amountValue.ValueKind != JsonValueKind.Number
+                    || !amountValue.TryGetInt32(out amount)
                     || amount is < 1 or > PointerInput.MaximumWheelMoves))
             {
                 return Failure("Scroll amount must be an integer from 1 through 20.");

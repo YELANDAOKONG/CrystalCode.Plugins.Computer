@@ -97,4 +97,38 @@ public sealed class MachineInfoTests
 
         Assert.Equal("VirtualBox returned a different VM UUID.", exception.Message);
     }
+
+    [Fact]
+    public void Read_HardwareUuidMatchingIsNotEnough()
+    {
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            MachineInfo.Read(
+                """
+                UUID="22222222-2222-2222-2222-222222222222"
+                hardwareuuid="11111111-1111-1111-1111-111111111111"
+                VMState="running"
+                """,
+                Uuid));
+
+        Assert.Equal("VirtualBox returned a different VM UUID.", exception.Message);
+    }
+
+    [Fact]
+    public void Read_MissingUuid_Fails()
+    {
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            MachineInfo.Read("VMState=\"running\"", Uuid));
+
+        Assert.Equal("VirtualBox returned a different VM UUID.", exception.Message);
+    }
+
+    [Fact]
+    public void Read_UuidCaseAndLineEndings_AreTolerated()
+    {
+        var status = MachineInfo.Read(
+            "UUID=\"AAAAAAAA-1111-1111-1111-111111111111\"\r\nVMState=\"running\"\r\n",
+            "aaaaaaaa-1111-1111-1111-111111111111");
+
+        Assert.True(status.IsRunning);
+    }
 }

@@ -24,7 +24,10 @@ internal static class VirtualBoxHost
             : Path.Combine(home, "sdk", "bindings", "xpcom", "python");
         if (Directory.Exists(binding))
         {
-            environment["PYTHONPATH"] = binding;
+            var existing = Environment.GetEnvironmentVariable("PYTHONPATH");
+            environment["PYTHONPATH"] = string.IsNullOrEmpty(existing)
+                ? binding
+                : binding + Path.PathSeparator + existing;
         }
 
         return environment;

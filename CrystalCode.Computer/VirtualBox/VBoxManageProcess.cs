@@ -39,6 +39,7 @@ internal sealed class VBoxManageProcess : IProcessRunner
             {
                 FileName = executable,
                 UseShellExecute = false,
+                RedirectStandardInput = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
@@ -70,6 +71,8 @@ internal sealed class VBoxManageProcess : IProcessRunner
         Task<StreamCapture>? stderrTask = null;
         try
         {
+            // The child must not read the host's stdin, so give it an empty one.
+            process.StandardInput.Close();
             stdoutTask = ReadStreamAsync(process.StandardOutput, cancellationToken);
             stderrTask = ReadStreamAsync(process.StandardError, cancellationToken);
             await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
@@ -81,15 +84,27 @@ internal sealed class VBoxManageProcess : IProcessRunner
                 stderr.Text,
                 stdout.Truncated || stderr.Truncated);
         }
-        catch (OperationCanceledException)
+        catch
+        {
+            // Cancellation or a stream failure must not leave the child running.
+            TryKill(process);
+            await DrainAsync(stdoutTask, stderrTask).ConfigureAwait(false);
+            throw;
+        }
+    }
+
+    private static void TryKill(Process process)
+    {
+        try
         {
             if (!process.HasExited)
             {
                 process.Kill(entireProcessTree: true);
             }
-
-            await DrainAsync(stdoutTask, stderrTask).ConfigureAwait(false);
-            throw;
+        }
+        catch (InvalidOperationException)
+        {
+            // The process exited between the check and the kill.
         }
     }
 

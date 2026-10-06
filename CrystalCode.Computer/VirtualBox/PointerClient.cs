@@ -9,7 +9,7 @@ internal sealed class PointerClient
 {
     private readonly ComputerSettings _settings;
     private readonly IProcessRunner _processes;
-    private readonly string _scriptPath;
+    private readonly string? _scriptPath;
 
     public PointerClient(
         ComputerSettings settings,
@@ -18,7 +18,7 @@ internal sealed class PointerClient
     {
         _settings = settings;
         _processes = processes;
-        _scriptPath = scriptPath ?? DefaultScriptPath();
+        _scriptPath = scriptPath;
     }
 
     public async Task ClickAsync(
@@ -115,13 +115,14 @@ internal sealed class PointerClient
         IReadOnlyList<string> arguments,
         CancellationToken cancellationToken)
     {
-        if (!File.Exists(_scriptPath))
+        var scriptPath = _scriptPath ?? DefaultScriptPath();
+        if (!File.Exists(scriptPath))
         {
             throw new InvalidOperationException(
                 "The pointer helper is not installed beside the tool assembly.");
         }
 
-        var command = new List<string> { _scriptPath };
+        var command = new List<string> { scriptPath };
         command.AddRange(arguments);
         try
         {
@@ -155,7 +156,12 @@ internal sealed class PointerClient
 
     private static string DefaultScriptPath()
     {
-        var directory = Path.GetDirectoryName(typeof(PointerClient).Assembly.Location);
+        return ScriptPathFor(typeof(PointerClient).Assembly.Location);
+    }
+
+    internal static string ScriptPathFor(string? assemblyLocation)
+    {
+        var directory = Path.GetDirectoryName(assemblyLocation);
         if (string.IsNullOrEmpty(directory))
         {
             throw new InvalidOperationException(

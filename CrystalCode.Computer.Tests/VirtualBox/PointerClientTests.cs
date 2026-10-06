@@ -68,4 +68,69 @@ public sealed class PointerClientTests
             File.Delete(script);
         }
     }
+
+    [Fact]
+    public async Task Click_WithoutAScriptPath_UsesTheHelperBesideTheAssembly()
+    {
+        var runner = new ScriptedProcessRunner
+        {
+            Handle = arguments => arguments.Contains("layout")
+                ? new ProcessResult(
+                    0,
+                    """
+                    {"absolute":true,"screens":[{"display":0,"width":100,"height":80,"x":0,"y":0,"active":true}]}
+                    """,
+                    "",
+                    false)
+                : new ProcessResult(0, "", "", false)
+        };
+        var client = new PointerClient(
+            new ComputerSettings("11111111-1111-1111-1111-111111111111", "VBoxManage"),
+            runner);
+
+        await client.ClickAsync(0, 10, 20, PointerButton.Left, 1, CancellationToken.None);
+
+        var expected = PointerClient.ScriptPathFor(typeof(PointerClient).Assembly.Location);
+        Assert.Equal(expected, runner.Arguments[0][0]);
+        Assert.Equal(expected, runner.Arguments[1][0]);
+        Assert.True(File.Exists(expected));
+    }
+
+    [Fact]
+    public async Task Click_MissingHelper_IsReportedWhenThePointerIsUsed()
+    {
+        var runner = new ScriptedProcessRunner();
+        var missing = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "Pointer.py");
+        var client = new PointerClient(
+            new ComputerSettings("11111111-1111-1111-1111-111111111111", "VBoxManage"),
+            runner,
+            missing);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            client.ClickAsync(0, 1, 1, PointerButton.Left, 1, CancellationToken.None));
+
+        Assert.Contains("not installed beside the tool assembly", exception.Message, StringComparison.Ordinal);
+        Assert.Empty(runner.Arguments);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void ScriptPathFor_WithoutALocation_Throws(string? location)
+    {
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            PointerClient.ScriptPathFor(location));
+
+        Assert.Contains("not installed beside the tool assembly", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ScriptPathFor_PlacesTheHelperBesideTheAssembly()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "tools");
+
+        var path = PointerClient.ScriptPathFor(Path.Combine(directory, "CrystalCode.Computer.dll"));
+
+        Assert.Equal(Path.Combine(directory, "Pointer.py"), path);
+    }
 }

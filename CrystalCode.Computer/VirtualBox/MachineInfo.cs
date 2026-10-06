@@ -7,19 +7,21 @@ internal static class MachineInfo
 {
     public static ComputerStatus Read(string output, string expectedUuid)
     {
-        var expected = $"UUID=\"{expectedUuid}\"";
-        if (!output.Contains(expected, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new InvalidOperationException("VirtualBox returned a different VM UUID.");
-        }
-
+        var uuidMatches = false;
         string? vmState = null;
         int? runLevel = null;
         string? version = null;
         foreach (var raw in output.Split('\n'))
         {
             var line = raw.TrimEnd('\r');
-            if (line.StartsWith("VMState=", StringComparison.Ordinal))
+            if (line.StartsWith("UUID=", StringComparison.Ordinal))
+            {
+                uuidMatches = string.Equals(
+                    ReadQuoted(line["UUID=".Length..]),
+                    expectedUuid,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            else if (line.StartsWith("VMState=", StringComparison.Ordinal))
             {
                 vmState = line["VMState=".Length..].Trim().Trim('"');
             }
@@ -36,6 +38,11 @@ internal static class MachineInfo
             {
                 version = CleanVersion(ReadQuoted(line["GuestAdditionsVersion=".Length..]));
             }
+        }
+
+        if (!uuidMatches)
+        {
+            throw new InvalidOperationException("VirtualBox returned a different VM UUID.");
         }
 
         if (string.IsNullOrEmpty(vmState))
