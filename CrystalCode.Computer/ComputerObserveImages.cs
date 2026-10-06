@@ -1,12 +1,10 @@
-using Crystal.Tools;
-
 using CrystalCode.Plugins.Hooks;
 
 namespace CrystalCode.Computer;
 
 /// <summary>
-/// Drops screenshots from this plugin's older <c>computer_observe</c> results.
-/// The three newest captures keep their images. Other tools are unchanged.
+/// Omits this plugin's older screenshots from one outbound model call.
+/// The session keeps every capture. Only <c>computer_observe</c> images are removed.
 /// </summary>
 public sealed class ComputerObserveImages : IPluginHook
 {
@@ -14,62 +12,59 @@ public sealed class ComputerObserveImages : IPluginHook
 
     public const string ToolName = "computer_observe";
 
-    private readonly Queue<string> _retainedCallIds = new();
-
-    private readonly HashSet<string> _seenCallIds = new(StringComparer.Ordinal);
-
-    private readonly object _gate = new();
-
-    public ValueTask OnSessionStartedAsync(
-        PluginSession session,
+    public ValueTask<IReadOnlyList<PluginModelItem>?> TransformModelAsync(
+        PluginModelRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(session);
+        ArgumentNullException.ThrowIfNull(request);
         cancellationToken.ThrowIfCancellationRequested();
-        lock (_gate)
+        var retained = RetainedIndexes(request.Items);
+        if (retained is null)
         {
-            _retainedCallIds.Clear();
-            _seenCallIds.Clear();
+            return ValueTask.FromResult<IReadOnlyList<PluginModelItem>?>(null);
         }
 
-        return ValueTask.CompletedTask;
+        var items = new PluginModelItem[request.Items.Count];
+        for (var index = 0; index < request.Items.Count; index++)
+        {
+            var item = request.Items[index];
+            items[index] = item is PluginModelToolResult result && DropsImages(result, index, retained)
+                ? WithoutImages(result)
+                : item;
+        }
+
+        return ValueTask.FromResult<IReadOnlyList<PluginModelItem>?>(items);
     }
 
-    public ValueTask<PluginToolResult?> AfterToolAsync(
-        ToolCall call,
-        PluginToolResult result,
-        CancellationToken cancellationToken = default)
+    private static HashSet<int>? RetainedIndexes(IReadOnlyList<PluginModelItem> items)
     {
-        ArgumentNullException.ThrowIfNull(call);
-        ArgumentNullException.ThrowIfNull(result);
-        cancellationToken.ThrowIfCancellationRequested();
-        if (!string.Equals(call.Name, ToolName, StringComparison.Ordinal)
-            || result.Images.Count == 0)
+        var captures = new List<int>();
+        for (var index = 0; index < items.Count; index++)
         {
-            return ValueTask.FromResult<PluginToolResult?>(null);
-        }
-
-        var retain = false;
-        lock (_gate)
-        {
-            if (_seenCallIds.Add(call.CallId))
+            if (items[index] is PluginModelToolResult result && IsCapture(result))
             {
-                _retainedCallIds.Enqueue(call.CallId);
-                while (_retainedCallIds.Count > RetainedCaptures)
-                {
-                    _retainedCallIds.Dequeue();
-                }
+                captures.Add(index);
             }
-
-            retain = _retainedCallIds.Contains(call.CallId);
         }
 
-        if (retain)
+        if (captures.Count <= RetainedCaptures)
         {
-            return ValueTask.FromResult<PluginToolResult?>(null);
+            return null;
         }
 
-        return ValueTask.FromResult<PluginToolResult?>(
-            new PluginToolResult(result.Text, result.Success));
+        return captures[^RetainedCaptures..].ToHashSet();
     }
+
+    private static bool DropsImages(
+        PluginModelToolResult result,
+        int index,
+        HashSet<int> retained) =>
+        IsCapture(result) && !retained.Contains(index);
+
+    private static bool IsCapture(PluginModelToolResult result) =>
+        string.Equals(result.Name, ToolName, StringComparison.Ordinal)
+        && result.Images.Count > 0;
+
+    private static PluginModelToolResult WithoutImages(PluginModelToolResult result) =>
+        new(result.Id, result.CallId, result.Name, result.Text, result.Success);
 }

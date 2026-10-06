@@ -1,4 +1,4 @@
-using Crystal.Tools;
+using Crystal.Chat;
 
 using CrystalCode.Plugins.Hooks;
 
@@ -9,66 +9,67 @@ namespace CrystalCode.Computer.Tests;
 public sealed class ComputerObserveImagesTests
 {
     [Fact]
-    public async Task AfterTool_LeavesOtherToolImages()
+    public async Task TransformModel_KeepsTheThreeNewestObserveCaptures()
     {
-        var hook = new ComputerObserveImages();
-        var result = Capture("other");
+        var user = Message("user", 9);
+        var read = Result("read-result", "read", 8);
+        var first = Observe("0", 1);
+        var second = Observe("1", 2);
+        var quiet = ObserveWithoutImage("2");
+        var third = Observe("3", 3);
+        var fourth = Observe("4", 4);
+        var fifth = Observe("5", 5);
+        var request = Request([user, read, first, second, quiet, third, fourth, fifth]);
 
-        var next = await hook.AfterToolAsync(
-            new ToolCall("1", "read", "{}"),
-            result);
+        var next = await new ComputerObserveImages().TransformModelAsync(request);
+
+        Assert.NotNull(next);
+        Assert.Equal(request.Items.Count, next.Count);
+        Assert.Same(user, next[0]);
+        Assert.Same(read, next[1]);
+        Assert.Empty(Assert.IsType<PluginModelToolResult>(next[2]).Images);
+        Assert.Equal(first.Text, Assert.IsType<PluginModelToolResult>(next[2]).Text);
+        Assert.Equal(first.Success, Assert.IsType<PluginModelToolResult>(next[2]).Success);
+        Assert.Empty(Assert.IsType<PluginModelToolResult>(next[3]).Images);
+        Assert.Same(quiet, next[4]);
+        Assert.Same(third, next[5]);
+        Assert.Same(fourth, next[6]);
+        Assert.Same(fifth, next[7]);
+        Assert.Single(Assert.IsType<PluginModelToolResult>(next[1]).Images);
+        Assert.Single(user.Images);
+    }
+
+    [Fact]
+    public async Task TransformModel_LeavesThreeOrFewerCaptures()
+    {
+        var request = Request([Observe("0", 1), Observe("1", 2), Observe("2", 3)]);
+
+        var next = await new ComputerObserveImages().TransformModelAsync(request);
 
         Assert.Null(next);
-        Assert.Single(result.Images);
     }
 
-    [Fact]
-    public async Task AfterTool_KeepsTheThreeNewestObserveCaptures()
-    {
-        var hook = new ComputerObserveImages();
-        var first = Capture("first");
-        var second = Capture("second");
-        var third = Capture("third");
-        var fourth = Capture("fourth");
+    private static PluginModelRequest Request(IReadOnlyList<PluginModelItem> items) =>
+        new(PluginModelPurpose.Work, items, acceptsImages: true);
 
-        Assert.Null(await hook.AfterToolAsync(Observe("a"), first));
-        Assert.Null(await hook.AfterToolAsync(Observe("b"), second));
-        Assert.Null(await hook.AfterToolAsync(Observe("c"), third));
-        Assert.Null(await hook.AfterToolAsync(Observe("d"), fourth));
+    private static PluginModelMessage Message(string id, int imageNumber) =>
+        new(id, ChatRole.User, $"see [Image #{imageNumber}]", [Image(imageNumber)]);
 
-        var expired = await hook.AfterToolAsync(Observe("a"), first);
-        var kept = await hook.AfterToolAsync(Observe("d"), fourth);
+    private static PluginModelToolResult Result(string id, string name, int imageNumber) =>
+        new(id, "call-" + id, name, "text", true, [Image(imageNumber)]);
 
-        Assert.NotNull(expired);
-        Assert.Equal(first.Text, expired.Text);
-        Assert.Equal(first.Success, expired.Success);
-        Assert.Empty(expired.Images);
-        Assert.Null(kept);
-    }
+    private static PluginModelToolResult Observe(string id, int imageNumber) =>
+        new(
+            id,
+            "call-" + id,
+            ComputerObserveImages.ToolName,
+            $"VM display 0: 1280x800. [Image #{imageNumber}]",
+            true,
+            [Image(imageNumber)]);
 
-    [Fact]
-    public async Task SessionStart_StartsANewWindow()
-    {
-        var hook = new ComputerObserveImages();
-        await hook.AfterToolAsync(Observe("a"), Capture("first"));
-        await hook.AfterToolAsync(Observe("b"), Capture("second"));
-        await hook.AfterToolAsync(Observe("c"), Capture("third"));
-        await hook.OnSessionStartedAsync(new PluginSession("/workspace", "session-2", "review"));
+    private static PluginModelToolResult ObserveWithoutImage(string id) =>
+        new(id, "call-" + id, ComputerObserveImages.ToolName, "The display is off.", true);
 
-        Assert.Null(await hook.AfterToolAsync(Observe("e"), Capture("current")));
-        Assert.Null(await hook.AfterToolAsync(Observe("f"), Capture("second")));
-        Assert.Null(await hook.AfterToolAsync(Observe("g"), Capture("third")));
-        Assert.Null(await hook.AfterToolAsync(Observe("h"), Capture("fourth")));
-
-        var expired = await hook.AfterToolAsync(Observe("e"), Capture("current"));
-
-        Assert.NotNull(expired);
-        Assert.Empty(expired.Images);
-    }
-
-    private static ToolCall Observe(string callId) =>
-        new(callId, ComputerObserveImages.ToolName, "{}");
-
-    private static PluginToolResult Capture(string text) =>
-        new(text, true, [new PluginImage("image/png", new byte[] { 1, 2, 3 })]);
+    private static PluginModelImage Image(int number) =>
+        new(number, "image/png");
 }

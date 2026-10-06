@@ -33,9 +33,10 @@ Plugins in Crystal Code and select a model and provider that support
 image input for `computer_observe`. The plugin joins the Work catalog.
 `computer_status` and `computer_observe` are reads. The other tools control
 the VM and are classified as privileged, so the host approval mode applies.
-A hook keeps images on the three newest `computer_observe` results from this
-plugin. An older result from this plugin keeps its text and drops the
-screenshot. Images returned by any other tool are left as they are.
+Before each model call, a hook drops screenshots from this plugin's older
+`computer_observe` results. The three newest captures are still sent. The
+session keeps every screenshot, and images from any other tool stay on the
+request.
 
 `Crystal.Tools` and `CrystalCode.Plugins` are referenced as sibling source
 projects. This project does not add NuGet packages. `IComputerAdapter` keeps the tool definitions
