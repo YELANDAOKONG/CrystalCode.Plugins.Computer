@@ -1,13 +1,12 @@
 # CrystalCode Computer
 
-This is an independent native dotnet tool set for Crystal Code. It controls
-one already-running VirtualBox VM: status and Guest Additions detection,
-a display capture, text and key input, pointer click, drag, and scroll, and
-one guest process.
+This is a Crystal Code plugin. It controls one already-running VirtualBox VM:
+status and Guest Additions detection, a display capture, text and key input,
+pointer click, drag, and scroll, and one guest process.
 
 Set `CRYSTAL_COMPUTER_VM_UUID` to the UUID of the VM the agent may control.
 Optionally set `CRYSTAL_COMPUTER_VBOXMANAGE` to the absolute path of `VBoxManage`.
-The VM must already be running. The tool set never accepts a VM identifier from
+The VM must already be running. The plugin never accepts a VM identifier from
 the model.
 
 `computer_status` reports Guest Additions from the running guest.
@@ -29,14 +28,17 @@ not in the usual installation directory, and `CRYSTAL_COMPUTER_PYTHON` when
 Other characters are rejected. Shortcuts use `computer_keys`.
 
 Publish `CrystalCode.Computer/CrystalCode.Computer.csproj` and place the published files
-and `tools.json` together in one directory under `~/.crystal/tools`. Enable
-External Tools in Crystal Code and select a model and provider that support
-image input for `computer_observe`. The manifest enables the Work catalog and
-declares `approval: always`. That declaration takes effect when Crystal Code's
-Home external tool approval source is `author`.
+and `plugin.json` together in one directory under `~/.crystal/plugins`. Enable
+Plugins in Crystal Code and select a model and provider that support
+image input for `computer_observe`. The plugin joins the Work catalog.
+`computer_status` and `computer_observe` are reads. The other tools control
+the VM and are classified as privileged, so the host approval mode applies.
+A hook keeps images on the three newest `computer_observe` results from this
+plugin. An older result from this plugin keeps its text and drops the
+screenshot. Images returned by any other tool are left as they are.
 
-The .NET tool contracts are referenced as sibling source projects. This project
-does not add NuGet packages. `IComputerAdapter` keeps the tool definitions
+`Crystal.Tools` and `CrystalCode.Plugins` are referenced as sibling source
+projects. This project does not add NuGet packages. `IComputerAdapter` keeps the tool definitions
 independent from VirtualBox. `VBoxManageAdapter` is the first implementation;
 it invokes `VBoxManage` without a shell and uses the configured VM UUID for
 every call. Pointer input uses the same rule for `python3`. This is in-process

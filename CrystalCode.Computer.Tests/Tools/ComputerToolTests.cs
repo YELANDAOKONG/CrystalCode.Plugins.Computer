@@ -9,6 +9,21 @@ namespace CrystalCode.Computer.Tests.Tools;
 public sealed class ComputerToolTests
 {
     [Fact]
+    public async Task Observe_WithoutImageInput_DoesNotCapture()
+    {
+        var adapter = new RecordingAdapter();
+        await UsingAdapter(adapter, async () =>
+        {
+            var output = await new ComputerObserveTool().InvokeAsync(
+                new ToolCall("1", "computer_observe", "{}"));
+
+            Assert.Equal(ToolResultStatus.Failure, output.Status);
+            Assert.Equal("This model cannot accept tool images.", output.Text);
+            Assert.False(adapter.Opened);
+        });
+    }
+
+    [Fact]
     public async Task Status_ReportsActiveGuestAdditions()
     {
         var adapter = new RecordingAdapter();

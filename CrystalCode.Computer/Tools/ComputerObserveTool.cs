@@ -9,8 +9,10 @@ using CrystalCode.Computer.Configuration;
 
 namespace CrystalCode.Computer.Tools;
 
-public sealed class ComputerObserveTool : IMultimodalTool
+public sealed class ComputerObserveTool : ITool, IMultimodalTool
 {
+    private const int MaximumDisplay = 7;
+
     private static readonly ToolDefinition Tool = new(
         "computer_observe",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"display\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":7}},\"additionalProperties\":false}")
@@ -19,36 +21,29 @@ public sealed class ComputerObserveTool : IMultimodalTool
 
     public ToolDefinition Definition => Tool;
 
+    public ValueTask<ToolOutput> InvokeAsync(
+        ToolCall call,
+        CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!TryReadDisplay(call.Arguments, out _, out var error))
+        {
+            return ValueTask.FromResult(new ToolOutput(error!, ToolResultStatus.Failure));
+        }
+
+        return ValueTask.FromResult(
+            new ToolOutput(
+                "This model cannot accept tool images.",
+                ToolResultStatus.Failure));
+    }
+
     public async ValueTask<MultimodalToolOutput> InvokeAsync(
         MultimodalToolCall call,
         CancellationToken cancellationToken = default)
     {
-        int display;
-        try
+        if (!TryReadDisplay(call.Arguments, out var display, out var error))
         {
-            using var document = JsonDocument.Parse(call.Arguments);
-            var root = document.RootElement;
-            if (root.ValueKind != JsonValueKind.Object)
-            {
-                return Failure("Tool arguments must be a JSON object.");
-            }
-
-            display = 0;
-            if (root.TryGetProperty("display", out var value)
-                && (value.ValueKind != JsonValueKind.Number
-                    || !value.TryGetInt32(out display)))
-            {
-                return Failure("Display must be an integer from 0 through 7.");
-            }
-        }
-        catch (JsonException)
-        {
-            return Failure("Tool arguments are not valid JSON.");
-        }
-
-        if (display is < 0 or > 7)
-        {
-            return Failure("Display must be an integer from 0 through 7.");
+            return Failure(error!);
         }
 
         try
@@ -73,6 +68,43 @@ public sealed class ComputerObserveTool : IMultimodalTool
         {
             return Failure("The VM screenshot could not be read.");
         }
+    }
+
+    private static bool TryReadDisplay(string arguments, out int display, out string? error)
+    {
+        display = 0;
+        error = null;
+        try
+        {
+            using var document = JsonDocument.Parse(arguments);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                error = "Tool arguments must be a JSON object.";
+                return false;
+            }
+
+            if (root.TryGetProperty("display", out var value)
+                && (value.ValueKind != JsonValueKind.Number
+                    || !value.TryGetInt32(out display)))
+            {
+                error = "Display must be an integer from 0 through 7.";
+                return false;
+            }
+        }
+        catch (JsonException)
+        {
+            error = "Tool arguments are not valid JSON.";
+            return false;
+        }
+
+        if (display is < 0 or > MaximumDisplay)
+        {
+            error = "Display must be an integer from 0 through 7.";
+            return false;
+        }
+
+        return true;
     }
 
     private static MultimodalToolOutput Failure(string message) =>
