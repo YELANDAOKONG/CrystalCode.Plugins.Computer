@@ -1,6 +1,6 @@
 # CrystalCode Computer
 
-This is a Crystal Code plugin. It controls one already-running VirtualBox VM:
+This is a plugin for [Crystal Code](https://github.com/YELANDAOKONG/CrystalCode). It controls one already-running VirtualBox VM:
 status and Guest Additions detection, a display capture, text and key input,
 pointer click, drag, and scroll, and one guest process.
 
