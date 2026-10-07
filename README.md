@@ -7,7 +7,7 @@ pointer click, drag, and scroll, and one guest process.
 Set `CRYSTAL_COMPUTER_VM_UUID` to the UUID of the VM the agent may control.
 Optionally set `CRYSTAL_COMPUTER_VBOXMANAGE` to the absolute path of `VBoxManage`.
 The VM must already be running. The plugin never accepts a VM identifier from
-the model.
+the model. Tested with VirtualBox 7.2.x.
 
 `computer_status` reports Guest Additions from the running guest.
 Run level 0 means they are not loaded, level 1 means the drivers are loaded,
