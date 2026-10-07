@@ -1,4 +1,4 @@
-# CrystalCode Computer
+# Crystal Code Computer
 
 **A Crystal Code plugin that lets the agent see and control a VirtualBox VM.**
 
