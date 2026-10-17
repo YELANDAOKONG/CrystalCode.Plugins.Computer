@@ -8,7 +8,7 @@ namespace CrystalCode.Computer.Tools;
 
 public sealed class ComputerStatusTool : ITool
 {
-    private static readonly ToolDefinition Tool = new(
+    private static readonly ToolDefinition Tool = ToolDefinition.Json(
         "computer_status",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}")
             .RootElement.Clone(),

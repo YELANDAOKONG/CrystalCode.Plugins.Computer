@@ -8,7 +8,7 @@ namespace CrystalCode.Computer.Tools;
 
 public sealed class ComputerScrollTool : ITool
 {
-    private static readonly ToolDefinition Tool = new(
+    private static readonly ToolDefinition Tool = ToolDefinition.Json(
         "computer_scroll",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"display\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":7},\"x\":{\"type\":\"integer\",\"minimum\":0},\"y\":{\"type\":\"integer\",\"minimum\":0},\"direction\":{\"type\":\"string\",\"enum\":[\"up\",\"down\",\"left\",\"right\"]},\"amount\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":20}},\"required\":[\"x\",\"y\",\"direction\"],\"additionalProperties\":false}")
             .RootElement.Clone(),

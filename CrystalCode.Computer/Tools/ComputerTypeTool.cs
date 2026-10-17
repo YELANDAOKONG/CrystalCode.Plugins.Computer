@@ -10,7 +10,7 @@ namespace CrystalCode.Computer.Tools;
 public sealed class ComputerTypeTool : ITool
 {
     private const int MaximumTextLength = 4096;
-    private static readonly ToolDefinition Tool = new(
+    private static readonly ToolDefinition Tool = ToolDefinition.Json(
         "computer_type",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"],\"additionalProperties\":false}")
             .RootElement.Clone(),

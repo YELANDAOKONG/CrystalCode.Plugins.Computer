@@ -15,7 +15,7 @@ public sealed class ComputerRunTool : ITool
     public const int DefaultTimeoutSeconds = 30;
     public const int MaximumTimeoutSeconds = 60;
 
-    private static readonly ToolDefinition Tool = new(
+    private static readonly ToolDefinition Tool = ToolDefinition.Json(
         "computer_run",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"executable\":{\"type\":\"string\"},\"arguments\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"maxItems\":32},\"directory\":{\"type\":\"string\"},\"timeoutSeconds\":{\"type\":\"integer\",\"minimum\":1,\"maximum\":60}},\"required\":[\"executable\"],\"additionalProperties\":false}")
             .RootElement.Clone(),

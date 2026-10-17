@@ -15,7 +15,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerObserveTool().InvokeAsync(
-                new ToolCall("1", "computer_observe", "{}"));
+                new ToolCall("1", "computer_observe", "{}", ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Failure, output.Status);
             Assert.Equal("This model cannot accept tool images.", output.Text);
@@ -30,7 +30,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerStatusTool().InvokeAsync(
-                new ToolCall("1", "computer_status", "{}"));
+                new ToolCall("1", "computer_status", "{}", ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Success, output.Status);
             Assert.Contains("running", output.Text, StringComparison.Ordinal);
@@ -45,7 +45,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerTypeTool().InvokeAsync(
-                new ToolCall("1", "computer_type", "{\"text\":\"caf\\u00e9\"}"));
+                new ToolCall("1", "computer_type", "{\"text\":\"caf\\u00e9\"}", ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Failure, output.Status);
             Assert.False(adapter.Opened);
@@ -62,7 +62,8 @@ public sealed class ComputerToolTests
                 new ToolCall(
                     "1",
                     "computer_click",
-                    "{\"x\":4,\"y\":9,\"button\":\"right\",\"clicks\":2}"));
+                    "{\"x\":4,\"y\":9,\"button\":\"right\",\"clicks\":2}",
+                    ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Success, output.Status);
             Assert.Equal(4, adapter.ClickX);
@@ -83,7 +84,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerClickTool().InvokeAsync(
-                new ToolCall("1", "computer_click", arguments));
+                new ToolCall("1", "computer_click", arguments, ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Failure, output.Status);
             Assert.False(adapter.Opened);
@@ -100,7 +101,8 @@ public sealed class ComputerToolTests
                 new ToolCall(
                     "1",
                     "computer_run",
-                    "{\"executable\":\"/bin/echo\",\"arguments\":[\"hi\"],\"timeoutSeconds\":5}"));
+                    "{\"executable\":\"/bin/echo\",\"arguments\":[\"hi\"],\"timeoutSeconds\":5}",
+                    ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Success, output.Status);
             Assert.Equal("/bin/echo", adapter.Command!.Executable);
@@ -123,7 +125,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerRunTool().InvokeAsync(
-                new ToolCall("1", "computer_run", arguments));
+                new ToolCall("1", "computer_run", arguments, ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Failure, output.Status);
             Assert.Contains("Timeout", output.Text, StringComparison.Ordinal);
@@ -138,7 +140,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerRunTool().InvokeAsync(
-                new ToolCall("1", "computer_run", "{\"executable\":\"/bin/echo\"}"));
+                new ToolCall("1", "computer_run", "{\"executable\":\"/bin/echo\"}", ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Success, output.Status);
             Assert.Equal(ComputerRunTool.DefaultTimeoutSeconds, adapter.Command!.TimeoutSeconds);
@@ -158,7 +160,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerScrollTool().InvokeAsync(
-                new ToolCall("1", "computer_scroll", arguments));
+                new ToolCall("1", "computer_scroll", arguments, ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Failure, output.Status);
             Assert.Contains("Scroll amount", output.Text, StringComparison.Ordinal);
@@ -176,7 +178,8 @@ public sealed class ComputerToolTests
                 new ToolCall(
                     "1",
                     "computer_scroll",
-                    "{\"x\":1,\"y\":1,\"direction\":\"up\",\"amount\":20}"));
+                    "{\"x\":1,\"y\":1,\"direction\":\"up\",\"amount\":20}",
+                    ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Success, output.Status);
             Assert.True(adapter.Opened);
@@ -195,7 +198,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerTypeTool().InvokeAsync(
-                new ToolCall("1", "computer_type", "{\"text\":\"hi\"}"));
+                new ToolCall("1", "computer_type", "{\"text\":\"hi\"}", ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Failure, output.Status);
             Assert.Equal("Text could not be sent to the configured VM.", output.Text);
@@ -209,7 +212,7 @@ public sealed class ComputerToolTests
         await UsingAdapter(adapter, async () =>
         {
             var output = await new ComputerKeysTool().InvokeAsync(
-                new ToolCall("1", "computer_keys", "{\"keys\":[\"f12\"]}"));
+                new ToolCall("1", "computer_keys", "{\"keys\":[\"f12\"]}", ToolInputKind.Json));
 
             Assert.Equal(ToolResultStatus.Success, output.Status);
             Assert.Equal(["f12"], adapter.Keys);

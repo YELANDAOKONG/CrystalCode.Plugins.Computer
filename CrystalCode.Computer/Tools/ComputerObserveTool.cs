@@ -13,7 +13,7 @@ public sealed class ComputerObserveTool : ITool, IMultimodalTool
 {
     private const int MaximumDisplay = 7;
 
-    private static readonly ToolDefinition Tool = new(
+    private static readonly ToolDefinition Tool = ToolDefinition.Json(
         "computer_observe",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"display\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":7}},\"additionalProperties\":false}")
             .RootElement.Clone(),

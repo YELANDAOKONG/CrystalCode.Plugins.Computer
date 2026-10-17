@@ -47,21 +47,21 @@ public sealed class ComputerPluginTests
     {
         var classifier = Assert.Single(new ComputerPlugin().Contribute().Classifiers);
         Assert.True(classifier.TryClassify(
-            new ToolCall("1", "computer_observe", "{}"),
+            new ToolCall("1", "computer_observe", "{}", ToolInputKind.Json),
             "/workspace",
             out var observed));
         Assert.Equal(PluginRisk.Read, observed!.Risk);
         Assert.Equal(PluginAuthority.Workspace, observed.Authority);
 
         Assert.True(classifier.TryClassify(
-            new ToolCall("1", "computer_click", "{}"),
+            new ToolCall("1", "computer_click", "{}", ToolInputKind.Json),
             "/workspace",
             out var clicked));
         Assert.Equal(PluginRisk.Privileged, clicked!.Risk);
         Assert.Equal(PluginAuthority.PrivilegedEscalation, clicked.Authority);
 
         Assert.False(classifier.TryClassify(
-            new ToolCall("1", "read", "{}"),
+            new ToolCall("1", "read", "{}", ToolInputKind.Json),
             "/workspace",
             out _));
     }

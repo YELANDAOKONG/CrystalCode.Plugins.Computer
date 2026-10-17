@@ -8,7 +8,7 @@ namespace CrystalCode.Computer.Tools;
 
 public sealed class ComputerDragTool : ITool
 {
-    private static readonly ToolDefinition Tool = new(
+    private static readonly ToolDefinition Tool = ToolDefinition.Json(
         "computer_drag",
         JsonDocument.Parse("{\"type\":\"object\",\"properties\":{\"display\":{\"type\":\"integer\",\"minimum\":0,\"maximum\":7},\"fromX\":{\"type\":\"integer\",\"minimum\":0},\"fromY\":{\"type\":\"integer\",\"minimum\":0},\"toX\":{\"type\":\"integer\",\"minimum\":0},\"toY\":{\"type\":\"integer\",\"minimum\":0},\"button\":{\"type\":\"string\",\"enum\":[\"left\",\"right\",\"middle\"]}},\"required\":[\"fromX\",\"fromY\",\"toX\",\"toY\"],\"additionalProperties\":false}")
             .RootElement.Clone(),
