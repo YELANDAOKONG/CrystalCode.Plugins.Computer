@@ -1,4 +1,5 @@
 using CrystalCode.Plugins.Hooks;
+using CrystalCode.Plugins.Hooks.Interfaces;
 
 namespace CrystalCode.Computer;
 
